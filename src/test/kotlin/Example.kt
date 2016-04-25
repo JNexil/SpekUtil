@@ -1,5 +1,4 @@
-@file:RunWith(SpekHybrid::class) //Without this, test run as default JUnit4
-@file:Spec("ExampleTest")
+@file:JvmName("ExampleTest")
 
 //Main description in test-trace is JVM class name
 
@@ -8,6 +7,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import su.jfdev.spek.hybrid.Spec
 import su.jfdev.spek.hybrid.SpekHybrid
+import su.jfdev.spek.hybrid.SpekLink
+import su.jfdev.spek.wrapper.DescribeTitle.*
+import su.jfdev.spek.wrapper.invoke
+
+class `LOL and lol`: SpekLink()
 
 //@Spec maybe used for setting custom name
 @Test @Spec("should same this") fun DescribeBody.`should this`() {

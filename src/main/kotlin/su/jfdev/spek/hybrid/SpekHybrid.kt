@@ -5,6 +5,7 @@ import org.jetbrains.spek.api.DescribeParser
 import org.jetbrains.spek.junit.JUnitDescriptionCache
 import org.jetbrains.spek.junit.JUnitNotifier
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.junit.runner.Runner
 import org.junit.runner.notification.RunNotifier
 import kotlin.reflect.KFunction
@@ -16,15 +17,37 @@ import kotlin.reflect.jvm.kotlinFunction
 /**
  * Jamefrus and his team on 24.04.2016.
  */
+@RunWith(SpekHybrid::class)
+open class SpekLink(val className: String? = null)
 
-class SpekHybrid(val specificationClass: Class<*>): Runner() {
+class SpekHybrid(var specificationClass: Class<*>): Runner() {
+
+    init {
+        if (SpekLink::class.java.isAssignableFrom(specificationClass)) {
+            val spekLink = specificationClass.asSubclass(SpekLink::class.java).newInstance()
+            val pack = specificationClass.`package`?.name?.plus(".") ?: ""
+            val name = "$pack${spekLink.className ?: spekLink.javaClass.simpleName}"
+            specificationClass = try {
+                Class.forName(name)
+            } catch(first: ClassNotFoundException) {
+                try {
+                    Class.forName(name + "Kt")
+                } catch(second: ClassNotFoundException) {
+                    first.printStackTrace()
+                    second.printStackTrace()
+                    specificationClass
+                }
+            }
+        }
+    }
+
     private val tree = let {
         val objectInstance = try {
             specificationClass.kotlin.objectInstance
         } catch(e: KotlinReflectionInternalError) {
             null
         }
-        val description = specificationClass.getAnnotation(Spec::class.java)?.nullableName ?: specificationClass.simpleName
+        val description = specificationClass.getAnnotation(Spec::class.java)?.nullableName  ?: specificationClass.simpleName
         DescribeParser().run {
             describe(description) {
                 functions().forEach {
